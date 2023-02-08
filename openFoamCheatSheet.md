@@ -155,7 +155,7 @@ watch residuals as application runs  (see Scripts 👩🏾‍💻) - need to run
 gnuplot Residuals - &
 ```
 
-exit
+
 print all jobs with PID 
 ```
 ps S
@@ -232,23 +232,23 @@ cat <../path/to/file >
 
 # Breakdown of OpenFoam 2012 + Keywords 
 (relevant to turbulence models)
-    * Of 2012
-        * Applications (solver definitions) -> can type “app”  in terminal to get here 
-            * Solvers -> “solvers” / “sol”
-                * Incompressible 
-                * Heat transfer 
-                * & more …
-            * Utilities -> “utilities”
-            * Tools
-            * Test
-        * Src -> can type “src” to get here
-            * TurbulenceModels
-            * atmosphericModels 
-            * fvOptions 
-            * finiteVolume 
-            * & more …
-        * lsorials -> can type “tut” to get here 
-        * & more …
+ * Of 2012
+     * Applications (solver definitions) -> can type “app”  in terminal to get here 
+         * Solvers -> “solvers” / “sol”
+             * Incompressible 
+             * Heat transfer 
+             * & more …
+         * Utilities -> “utilities”
+         * Tools
+         * Test
+     * Src -> can type “src” to get here
+         * TurbulenceModels
+         * atmosphericModels 
+         * fvOptions 
+         * finiteVolume 
+         * & more …
+     * lsorials -> can type “tut” to get here 
+     * & more …
 
 # Scripts 👩🏾‍💻
 (Mostly for GNU plots)

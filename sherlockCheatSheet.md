@@ -41,6 +41,31 @@ scp -r jnwagwu@login.sherlock.stanford.edu:hr11DS.sbatch _UILCode/cfd/sherlock_s
 ```
 
 
+### Finding and deleting files/directories 
+(can go in general code cheat sheet)
+```bash 
+# first find files (in current path, can replace . with real path)
+find . -name '*py*'
+
+# then delete as needed
+find . -name '*py*' -delete
+
+
+# --- finding other groups of files 
+
+# all files with numbers
+find . -name "[0-9]*"
+
+find . -name '*([0-5][0-9]|6[0-7])*'
+
+find <path> -type f | grep -E "/myfile_([0-9]|[0-5][0-9]|6[0-7])\.log$"
+
+# files between 1 and 59? -> cant get delete to work, but this is recursive 
+find . -type d | grep -E "([1-5]|[1-5])"
+find .|  grep -E "([1-5]|[1-5])"
+```
+
+
 -----------
 ## Running a program (simple)
 request resources
@@ -82,29 +107,7 @@ scp -r cfd/of2012_projects/hr11D2 jnwagwu@login.sherlock.stanford.edu:
 scp -r . jnwagwu@login.sherlock.stanford.edu:ofCases/<desiredSherlockCaseName>
 ```
 
-**finding and deleting unneeded files** 
-(can go in general code cheat sheet)
-```bash 
-# first find files (in current path, can replace . with real path)
-find . -name '*py*'
 
-# then delete as needed
-find . -name '*py*' -delete
-
-
-# --- finding other groups of files 
-
-# all files with numbers
-find . -name "[0-9]*"
-
-find . -name '*([0-5][0-9]|6[0-7])*'
-
-find <path> -type f | grep -E "/myfile_([0-9]|[0-5][0-9]|6[0-7])\.log$"
-
-# files between 1 and 59? -> cant get delete to work, but this is recursive 
-find . -type d | grep -E "([1-5]|[1-5])"
-find .|  grep -E "([1-5]|[1-5])"
-```
 
 
 
