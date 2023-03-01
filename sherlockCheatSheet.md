@@ -17,6 +17,7 @@ ctrl+q to close micro
 ### Copying files 
 
 **copy local to sherlock**
+-> this is done on a local bash terminal, btw 
 ``` bash
 # generally 
 scp cfd/<subfolder>/<file> jnwagwu@login.sherlock.stanford.edu:<location in sherlock to copy to, leave empty if home>
@@ -38,6 +39,8 @@ scp -r jnwagwu@login.sherlock.stanford.edu:hr11DS/postProcessing/samples/130 cfd
 scp -r jnwagwu@login.sherlock.stanford.edu:sing.sh _UILCode/cfd/sherlock_scripts/sing_112622.sh
 # or
 scp -r jnwagwu@login.sherlock.stanford.edu:hr11DS.sbatch _UILCode/cfd/sherlock_scripts/hr11DS_112622.sbatch
+
+scp -r jnwagwu@login.sherlock.stanford.edu:pp .
 ```
 
 
@@ -185,18 +188,26 @@ rm *slurm* & sbatch test.sbatch
 rm *slurm* & sbatch hr11DS.sbatch
 
 
-# check position in queue 
+# check position in queue, will also give job id/node name associated w/ slurm file
 squeue -u $USER
-# >> will also give job id associated w/ slurm file …
 
-# see if job worked
-ls
+# monitor the job  
+ssh <sh02-10n48 or other node name>
+top # to see the use of resources..
+
 
 # if new slurm out put file 
 cat slurm-….
 ```
 
+----
+## Installing software 
 
+```bash
+# load modules if needed 
+# use git version, cmake, make etc 
+
+```
 
 -----
 ## Example Scripts

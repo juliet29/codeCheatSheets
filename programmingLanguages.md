@@ -1,10 +1,10 @@
 
 # Programming Languages
 
+-----------
 ## Python 
 
 ### Python Environment 
-
 ```bash
 # Remove venv
 rm -rf psych251env/
@@ -20,8 +20,6 @@ source <env_name>/bin/activate
 pip install ipykernel pandas numpy scipy matplotlib pandas plotly 
 # for plotly charts 
 pip install --upgrade nbformat
-# energy modeling 
-pip install energyplus eppy ladybug-core
 
 # note requirements 
 pip freeze > requirements.txt
@@ -36,7 +34,9 @@ virtualenv cfdenv
 source cfdenv/bin/activate
 pip install -r requirements.txt
 ```
-### General Python Issues 
+### General Python
+[Code imporvement article -> see Enums](https://towardsdatascience.com/5-python-tricks-that-distinguish-senior-developers-from-juniors-826d57ab3940)
+
 Getting help 
 ```bash
 #first, activate venv, then:
@@ -47,7 +47,7 @@ pandas.read_csv
 ```
 
 lists and dictionaries
-``` bash
+``` python
 # list comprehension dictionary 
 myDict = { k:v for (k,v) in zip(keys, values)} 
 
@@ -58,7 +58,14 @@ a.append(7)
 a.extend([2, 5, 7])
 ```
 
+importing modules from local files 
+```python
+import sys
+sys.path.insert(0, "../scripts")
+from helpers import *
 
+
+```
 
 
 
@@ -66,21 +73,20 @@ a.extend([2, 5, 7])
 ### Python packages 
 
 
-#### Pandas: (Cheat Sheet Pandas)
+#### Pandas
 
 Visualization 
-```bash
+```python
 # show all the data from a series / dataframe 
 with pd.option_context('display.max_rows', None, 'display.max_columns', None):  
  print(df_downsample.isnull().sum()/len(df_downsample))
 
 # quick histogram 
 df.float.hist(bins=30, figsize=(3,2))
-
 ```
 
 Bringing in data, making new dataframes, exporting data 
-```bash
+```python
 
 # delete nans in a dataframe in one line 
 df = df[np.isfinite(df.rgdppc_2000)]
@@ -95,36 +101,52 @@ df = pd.DataFrame(dict, index=[0]).T
 # export to csv
 df.to_csv("outputs/name.csv", index=False)
 
-using the "apply" function to modify a series 
+# using the "apply" function to modify a series 
 df["duration"] = df["duration"].apply(lambda x: x -1 if x >= 5 else x)
-
 # doing this and involving multiple columns of a dataframe 
 df['c'] = df.apply(lambda row: row.a + row.b, axis=1)
 
 ```
 
 Comparisons
-```bash
+```python
 # compare column values across dataframes using merge ‼️
 pd.merge(df.iloc[cid["BP 1A Structural Concrete"]], df_mar_start, on=['task_code'], how='inner')
 ```
 
 Selection 
-```bash
+```python
 # select in between two dates => 
 ## without making time indices:
+noon_start = str2dt('2022, 07, 20, 12, 00') # strdt in in _UILCode/windows/analysis/scripts
 mask = (df['DateTime'] >= noon_start) & (df['DateTime'] <= noon_end)
 df_b = df.loc[mask].reset_index(drop=True)
-df_b 
 
 # select rows in a dataframe where the dates match those in a list 
 time_mask = df0_split["DateTime"].dt.time.isin(dfr_split.index.time)
 ```
 
 Splitting Data 
-```bash 
+```python 
+# split a dataframe into two 
 df1, df0 = [x.reset_index(drop=True) for _, x in df_b.groupby(df_b['Room'] < 1)]
 ```
+
+Grouping Data
+```python 
+# aggregate data based on hour and room 
+df_hour = df.groupby([times.dt.date, times.dt.hour, "Room"]).mean()
+df_hour.head()d
+
+```
+
+Generating List of Dates with Pandas 
+```python 
+pd.date_range('2025-01-01','2025-12-31', 
+              freq='MS').strftime("%Y-%b").tolist()
+
+```
+
 
 #### Seaborn
 ```python
@@ -137,34 +159,88 @@ plt.show()
 ```
 
 #### Plotly 
+
+[Named CSS Colors for Plotly](https://stackoverflow.com/questions/72496150/user-friendly-names-for-plotly-css-colors)
+
 ‼️ is there a function that turns plotlyjs plots into regular plots that can be viewed in github? 
+
+
 ```python
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
 # quick line plot 
 fig = go.Figure()
 fig.add_trace(go.Scatter(
     x=df0["DateTime"],
     y=df0["Temp C"], 
+    name="Data name",
     mode='lines+markers',
     marker_symbol='<"0" | "x"  | "square" >',
-    marker_color='< >'
+    marker_color='< >',
+    showlegend=False,
+    text=df0["Other Data"] # hover text label 
 ))
 
-fig.update_layout(title='All Data',
-                   xaxis_title='Dates',
-                   yaxis_title='Temperature (ºC)')
+fig.update_layout(xaxis_title='Dates',
+                  yaxis_title='Temperature (ºC)',
+                  title='All Data')
+                  
 
-
-Named css colors for plotly
 
 # subplots
 fig = make_subplots(rows=5, cols=1, shared_xaxes=True, subplot_titles=("Plot 1", "Plot 2", "Plot 3", "Plot 4")
-)
 
-fig.add_trace(go.Scatter(
-x=rmse_df.index.time,
-y=rmse_df[0],
-name="RMSE of Temperature in Rooms (15 min intervals)",
-), row=ix+1, col=1)
+for ix, room in enumerate(rooms.values()):
+  # only show legend the first time, and make similar items have the same color 
+    showlegendbool = True if ix == 0 else False
+    fig.add_trace(go.Scatter(
+        x=room["air"][0].datetimes,
+        y=room["air"][0].values, 
+        mode='lines+markers',
+        name="Zone Air Temperature",
+        showlegend=showlegendbool,
+        marker_color="blue"
+    ), row=ix+1, col=1)
+    fig.add_trace(go.Scatter(
+        x=room["amb"][0].datetimes,
+        y=room["amb"][0].values, 
+        mode='lines+markers',
+        name="Site Outdoor Air Temperature",
+        showlegend=showlegendbool,
+        marker_color="blue"
+    ), row=ix+1, col=1)
+
+# plot multidimensional subplots
+fig = make_subplots(rows=3, cols=2, shared_xaxes=False, subplot_titles=list(exp_dct.keys()))
+
+for ix, df in enumerate(exp_dct.values()):
+    # only show legend the first time
+    showlegendbool = True if ix == 0 else False
+    # keep row numbers in check 
+    row_num = int(ix/2) + 1
+
+    if ix%2 == 0:
+        fig.add_trace(go.Scatter(
+            x=df["DateTime"],
+            y=df["Temp C"],
+            mode='lines+markers',
+            name="Room Air Temperature",
+            showlegend=showlegendbool,
+            marker_color="blue"
+        ), row=row_num, col=1)
+    else:
+        fig.add_trace(go.Scatter(
+            x=df["DateTime"],
+            y=df["Temp C"],
+            mode='lines+markers',
+            name="Site Outdoor Air Temperature",
+            showlegend=showlegendbool,
+            marker_color="blue"
+        ), row=row_num, col=2) 
+
+fig.show()
+
 ```
 
 #### Jupyter notebooks 
@@ -175,6 +251,93 @@ Magic python functions enable interactive work ‼️
 Apache parquet - docs
 Julia Plotly - docs
 Icecream - article, GitHub 
+
+
+
+#### Energy Modeling in Python
+[Github example for adjusting IDFs](https://github.com/juliet29/cee256_final_2022/blob/main/calibration/adjustModels.ipynb)
+
+[Github example for generating multiple IDFs,and extracting data from SQL files](https://github.com/juliet29/cee256_final_2022/blob/main/optimization/opt_fun.py)
+
+Installation of E+ on Mac is in Applications/EnergyPlus-9-4-0
+
+[Ladybug SQL Module](https://www.ladybug.tools/ladybug/docs/ladybug.sql.html)
+
+[Ladybug Data Collections Module](https://www.ladybug.tools/ladybug/docs/ladybug.datacollection.html)
+
+Installing the requisite Python modules 
+```bash
+# energy modeling pip installs
+pip install energyplus eppy ladybug-core
+```
+
+SketchUp -> IDF process 
+* Need to make sure that a zone is established for computation to happen 
+
+
+Post-processing from SQL files with Ladybug SQL 
+```python 
+# imports 
+from ladybug.sql import SQLiteResult
+from ladybug.analysisperiod import AnalysisPeriod as ap
+
+# See which surface data is coming from for multi-surface data 
+sqld.data_collections_by_output_name("Surface Outside Face Temperature")[0].header 
+# --> @1 seems to mean every one hour...
+# can change this to be a dictionary, so can extract the data
+<...>.header.to_dict()
+# to get the specific surface
+out_surf[1].header.to_dict()["metadata"]["Surface"]
+
+# See time intervals of the data 
+sqld.data_collections_by_output_name("Surface Outside Face Temperature")[0].datetime_strings
+
+# Creating an Analysis Period, and the filtering based on it  
+exp01_ap = ap(st_month=7, st_day=20, end_month=7, end_day=23,  is_leap_year=True)
+# ---> for some reasone, including st_hour, and end_hour makes it take one value per day.. ‼️
+zone_air.filter_by_analysis_period(exp01_ap)
+
+
+# Plotting
+x=zone_air_exp01.datetimes,
+y=zone_air_exp01.values, 
+```
+
+#### Energy Modeling, Generally 
+[EnergyPlus Essentials](https://energyplus.net/assets/nrel_custom/pdfs/pdfs_v22.2.0/EnergyPlusEssentials.pdf)
+
+Bash Shortcuts for E+
+```bash
+# in BEM folder, can get to eplus as...
+ls $EPLUS_BEM #=> ../../../../Applications/EnergyPlus-22-2-0/
+
+# EPlus 22.2 idd file 
+$EPLUS_BEM_IDD
+```
+
+Running E+ on the CLI
+```bash
+# run from command line and direct oupput to a different directtory 
+energyplus -i $EPLUS_BEM_IDD -w weather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw -d examples/AFNWindowOp examples/AFNWindowOp.idf
+
+# only need to spec idd if want to use a different one than where the executable is 
+energyplus -w weather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw -d examples/AFNWindowOp examples/AFNWindowOp.idf
+```
+Modifying IDFs
+- [View CAD/.dxf files online](https://sharecad.org/)
+```IDF
+! add SQL files 
+    Output:SQLite,
+        SimpleAndTabular;                       !- Option Type
+
+! add output for drawings 
+  Output:Surfaces:Drawing,dxf;
+
+
+```
+
+
+
 
 -----------------
 ## Julia 

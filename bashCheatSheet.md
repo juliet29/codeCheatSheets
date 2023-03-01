@@ -1,6 +1,6 @@
 # Bash Cheat Sheet 
 
-## Copy files
+## Copy, rename files and folders
 ``` bash 
 # copy and rename one stl
 cp cad/box5H.stl of2012_projects/hr11_shm5H/constant/triSurface/box.stl
@@ -8,9 +8,13 @@ cp cad/box5H.stl of2012_projects/hr11_shm5H/constant/triSurface/box.stl
 # copy an stl without renaming 
 cp /home/wardah/temp/text_file1.txt /home/wardah/temp2
 
-# copy over multiple stls 
+# copy all files in a folder
 cp -r ../cad/STLs/blenderRoom_020623/* hr12b/constant/triSurface
+
+# rename a file 
+mv oldname newname 
 ```
+
 
 
 ## Navigation 
@@ -66,6 +70,9 @@ find . -name '*py*'
 # then delete as needed
 find . -name '*py*' -delete
 
+# find and delete early folders from an openfoam run 
+find . -name "*0.*" -exec rm -rf {} +
+
 # all files with numbers
 find . -name "[0-9]*"
 
@@ -76,7 +83,31 @@ find <path> -type f | grep -E "/myfile_([0-9]|[0-5][0-9]|6[0-7])\.log$"
 # files between 1 and 59? -> cant get delete to work, but this is recursive 
 find . -type d | grep -E "([1-5]|[1-5])"
 find .|  grep -E "([1-5]|[1-5])"
+```
 
 
+##  Micro 
+```bash
+quit: ctrl + q
+save: ctrl + s
+
+```
+
+
+## Fish 
+
+Set the value of the variable _$foo_ to be ‘hi’.:
+```bash
+set foo hi
+```
+
+Functions on the command line 
+```bash
+# lazytouch, make a file and then open it
+# --> usage lto folder/filename.suffix
+function lto
+    touch $argv
+    code $argv
+end
 
 ```
