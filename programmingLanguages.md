@@ -1,6 +1,14 @@
 
 # Programming Languages
 
+## TODO 
+[] setting up a file that is automatically imported to everything 
+[] conda environments 
+
+
+
+
+
 -----------
 ## Python 
 
@@ -56,6 +64,9 @@ a.append(7)
 
 # add list to a list 
 a.extend([2, 5, 7])
+
+# delete an item from a dictionary 
+a.pop("Item to Delete")
 ```
 
 importing modules from local files 
@@ -63,7 +74,34 @@ importing modules from local files
 import sys
 sys.path.insert(0, "../scripts")
 from helpers import *
+```
 
+Retrieving name of a variable 
+```python 
+import inspect
+
+def retrieve_name(var):
+    callers_local_vars = inspect.currentframe().f_back.f_locals.items()
+    return [var_name for var_name, var_val in callers_local_vars if var_val is var]
+
+```
+
+Reading from text files 
+```python 
+with open("colors.txt", "r") as colors:
+	lines = colors.readlines()	
+theme_colors = [l.replace("\n", "") for l in lines]
+```
+
+Working with Enums 
+```python 
+from enum import Enum
+
+class In(Enum):
+    SINGAPORE = 0
+    SAN_FRANCISCO = 1
+    COSTS = 2
+    DIST = 3
 
 ```
 
@@ -72,46 +110,39 @@ from helpers import *
 
 ### Python packages 
 
-
-#### Pandas
-
-Visualization 
+#### Icecream for debugging 
 ```python
-# show all the data from a series / dataframe 
-with pd.option_context('display.max_rows', None, 'display.max_columns', None):  
- print(df_downsample.isnull().sum()/len(df_downsample))
+from icecream import ic 
+ic.configureOutput(includeContext=True)
 
-# quick histogram 
-df.float.hist(bins=30, figsize=(3,2))
 ```
 
-Bringing in data, making new dataframes, exporting data 
+#### Pandas
+Importing and Exporting Data
 ```python
+
+# dataframe from dictionary 
+df = pd.DataFrame(dict).T # ‼️what if want numerical index
+df = pd.DataFrame(dict, index=[0]).T 
+df = pd.DataFrame.from_dict(s_dict, orient="index")
+
+
+# read in csv 
+sing_df = pd.read_excel("sheets/land_use_constrained_data.xlsx", sheet_name=1, header=5, usecols="B:V", nrows=9)
 
 # delete nans in a dataframe in one line 
 df = df[np.isfinite(df.rgdppc_2000)]
 
+# dropping columbs
+df.drop(0, inplace=True)
+
 # reset indices
 df_new = df.reset_index(drop=True) # for some reason inplace erases everything 
 
-# dataframe from dictionary 
-df = pd.DataFrame(dict).T ‼️what if want numerical index
-df = pd.DataFrame(dict, index=[0]).T 
 
 # export to csv
 df.to_csv("outputs/name.csv", index=False)
 
-# using the "apply" function to modify a series 
-df["duration"] = df["duration"].apply(lambda x: x -1 if x >= 5 else x)
-# doing this and involving multiple columns of a dataframe 
-df['c'] = df.apply(lambda row: row.a + row.b, axis=1)
-
-```
-
-Comparisons
-```python
-# compare column values across dataframes using merge ‼️
-pd.merge(df.iloc[cid["BP 1A Structural Concrete"]], df_mar_start, on=['task_code'], how='inner')
 ```
 
 Selection 
@@ -126,10 +157,13 @@ df_b = df.loc[mask].reset_index(drop=True)
 time_mask = df0_split["DateTime"].dt.time.isin(dfr_split.index.time)
 ```
 
-Splitting Data 
-```python 
-# split a dataframe into two 
-df1, df0 = [x.reset_index(drop=True) for _, x in df_b.groupby(df_b['Room'] < 1)]
+Bringing Data Together 
+```python
+# compare column values across dataframes using merge ‼️
+pd.merge(df.iloc[cid["BP 1A Structural Concrete"]], df_mar_start, on=['task_code'], how='inner')
+
+
+# TODO pd.concat()
 ```
 
 Grouping Data
@@ -138,7 +172,19 @@ Grouping Data
 df_hour = df.groupby([times.dt.date, times.dt.hour, "Room"]).mean()
 df_hour.head()d
 
+# bin data based on a deired number of bins 
+transport_metric = df.iloc[:, 8]
+a = pd.cut(transport_metric, bins=4, retbins=False)
+transport_metric = a.apply(lambda x: x.right)
+
 ```
+
+Splitting Data 
+```python 
+# split a dataframe into two 
+df1, df0 = [x.reset_index(drop=True) for _, x in df_b.groupby(df_b['Room'] < 1)]
+```
+
 
 Generating List of Dates with Pandas 
 ```python 
@@ -147,16 +193,76 @@ pd.date_range('2025-01-01','2025-12-31',
 
 ```
 
+Functions on Data 
+```python 
+# using the "apply" function to modify a series 
+df["duration"] = df["duration"].apply(lambda x: x -1 if x >= 5 else x)
 
-#### Seaborn
+# doing this and involving multiple columns of a dataframe 
+df['c'] = df.apply(lambda row: row.a + row.b, axis=1)
+
+```
+
+
+Datetimes 
+- [Aliases for datetimes](https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
+```python 
+# every 6 month frequency 
+times = pd.date_range(start="2023-07-01",end="2045-07-01", freq="6MS")
+
+# anchor at the beginning of a month 
+times = pd.date_range(start="2023-07-01",end="2045-07-01", freq="AS-JUL")
+
+```
+
+Visualization 
 ```python
+# show all the data from a series / dataframe 
+with pd.option_context('display.max_rows', None, 'display.max_columns', None):  
+ print(df_downsample.isnull().sum()/len(df_downsample))
+
+# quick histogram 
+df.float.hist(bins=30, figsize=(3,2))
+```
+
+
+#### Seaborn and Matplotlib 
+* plotting distributions, see github: [ma2021/description.ipynb](https://github.com/psych251/ma2021/blob/main/code/notebooks/description.ipynb)
+  * click "see Raw" to see cutoff parts of code if needed
+
+```python
+# importing and set themes 
+import seaborn as sns
+sns.set_theme(style="ticks")
+
+# simple probability distributions 
+sns.displot(deriv_df, x="deriv")
+
 # visualize all the data correlations -> pairplots
-sns.pairplot(df, height=1, aspect =2)
+sns.pairplot(df, height=1, aspect =2, hue="<df col>")
 plt.show()
 
-# plotting distributions, see github: ma2021/description.ipynb
-    -> click "see Raw" to see cutoff parts of code if needed
+# parplot with regression 
+g = sns.pairplot(an_df.iloc[:, 0:-1],  kind="reg")
 ```
+
+Plotting with Matplotlib using subplots
+```python 
+import seaborn as sns
+sns.set_theme(style="ticks")
+import matplotlib.pyplot as plt
+
+
+fig, (ax0, ax) = plt.subplots(nrows=1, ncols=2, figsize=[10,3])
+ax0.bar(x=range(1,len(per_var)+1), height=per_var, tick_label=short_labels)
+ax0.set_ylabel('Percentage of Explained Variance')
+ax0.set_xlabel('Principal Component')
+ax0.set_title('Scree Plot')
+
+```
+
+
+[Hide Legends](https://stackoverflow.com/questions/9834452/how-do-i-make-a-single-legend-for-many-subplots)
 
 #### Plotly 
 
@@ -169,7 +275,15 @@ plt.show()
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-# quick line plot 
+# super quick scatter plot 
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=a,
+    y=b, 
+    mode='markers',
+))
+
+# quick line plot
 fig = go.Figure()
 fig.add_trace(go.Scatter(
     x=df0["DateTime"],
@@ -181,6 +295,20 @@ fig.add_trace(go.Scatter(
     showlegend=False,
     text=df0["Other Data"] # hover text label 
 ))
+
+
+# scatter plot with color scale
+fig.add_trace(go.Scatter(
+    x=sing_space["Longitude"],
+    y=sing_space["Latitude"], 
+    mode='markers',
+    marker=dict(
+        color=kmeans.labels_,
+        showscale=True,
+        size=16
+    )
+))
+
 
 fig.update_layout(xaxis_title='Dates',
                   yaxis_title='Temperature (ºC)',
@@ -241,6 +369,21 @@ for ix, df in enumerate(exp_dct.values()):
 
 fig.show()
 
+
+```
+
+[Making and setting plotly themes](https://stackoverflow.com/questions/63011674/plotly-how-to-change-the-default-color-pallete-in-plotly)
+* [Plotly reference on themes](https://plotly.com/python/templates/#saving-and-distributing-custom-themes)
+```python 
+import plotly.io as pio
+import plotly.graph_objects as go
+pio.templates["myname"] = go.layout.Template(
+    layout=go.Layout(
+        colorway=['#ff0000', '#00ff00', '#0000ff']
+    )
+# combine templates 
+pio.templates.default = 'plotly_white+myname'
+
 ```
 
 #### Jupyter notebooks 
@@ -274,6 +417,17 @@ pip install energyplus eppy ladybug-core
 SketchUp -> IDF process 
 * Need to make sure that a zone is established for computation to happen 
 
+Editing epJSON files 
+``` python 
+import json
+with open('1ZoneUncontrolled.epJSON') as f:
+    input_data=json.load(f)
+input_data['Building']['Simple One Zone (Wireframe DXF)']['north_axis']=90
+
+with open('new_edit.epJSON','w') as f:
+    json.dump(input_data,f, indent=4)
+```
+
 
 Post-processing from SQL files with Ladybug SQL 
 ```python 
@@ -297,11 +451,32 @@ exp01_ap = ap(st_month=7, st_day=20, end_month=7, end_day=23,  is_leap_year=True
 # ---> for some reasone, including st_hour, and end_hour makes it take one value per day.. ‼️
 zone_air.filter_by_analysis_period(exp01_ap)
 
-
 # Plotting
 x=zone_air_exp01.datetimes,
 y=zone_air_exp01.values, 
 ```
+
+
+Using Custom LoadSQL class defined in _UILCode/BuildingEnergyModel/scripts/helpers.py 
+```python
+# load sql 
+dir0 = "../examples/AFN_SS/eplusout.sql"
+a = LoadSQL(dir0)
+
+# check available outputs
+a.ao
+
+# check headers for interesting outputs 
+a.enumerate_data_headers("Site Outdoor Air Drybulb Temperature")
+
+# make a list of tuples with desired data 
+desired_data = [(i, j, k) for i, j, k in zip(["Zone Mean Air Temperature"]*4 + ["Site Outdoor Air Drybulb Temperature"], [4,5,6,7,1], ["West", "South", "North", "East", "Sep Out"] )]
+
+ad = a.get_valid_data(desired_data) 
+
+a.plot_temps()
+```
+
 
 #### Energy Modeling, Generally 
 [EnergyPlus Essentials](https://energyplus.net/assets/nrel_custom/pdfs/pdfs_v22.2.0/EnergyPlusEssentials.pdf)
@@ -322,19 +497,66 @@ energyplus -i $EPLUS_BEM_IDD -w weather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3
 
 # only need to spec idd if want to use a different one than where the executable is 
 energyplus -w weather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw -d examples/AFNWindowOp examples/AFNWindowOp.idf
+
+# convert from epjson and run 
+energyplus -w weather/USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw -d rosseRoomModel/230301_rr/test_01 -c rosseRoomModel/230301_rr/test_01.epJSON
+
+# convert between epJSON and IDF and vice-versa 
+energyplus --convert-only -d folder/output_dir name.idf
+
 ```
-Modifying IDFs
+IDF Modifications 
 - [View CAD/.dxf files online](https://sharecad.org/)
-```IDF
+- [Updating IDF Versions](https://energyplushelp.attachments8.freshdesk.com/data/helpdesk/attachments/production/67022359683/original/multipleversionidfconversionsreadme.txt?response-content-type=text%2Fplain&Expires=1677705989&Signature=K5PInHdpqAsBNfKyPhioqfRyl3L-0M12lDmJjlO5UXTGQ6HqBfZ9qNxDlA~yex0KdjVV-NJSO5IowrnyWfrMTvt-ob0~-KLsQfFiuPlsOCzjSu~ThGXZ3jVmQm9oR0I70iUhk-82tKi~WZqh3Ip0bxOtyc88vM4lBZhdz00nVjQWsNhJ7HdHNtM9NSactde9MisjE-~EIq5qEt2FE2VlvrDLr~HqiDEDfdtsT8gzKPkglYHuywbK45pEPtQCCFBFhJ~WM~OjogM7z9K4IxjwDvdkEe7pRAn45kjQTiJRagKFqsJyp3qL5l2ssMuzX4Il2q7aJqX2BSPXolBK5hz-lQ__&Key-Pair-Id=APKAJ7JARUX3F6RQIXLA)
+  - To launch the GUI, click on IDFVersionUpdater application bundle from /Applications/EnergyPlus-X-X-X/PreProcess/IDFVersionUpdater
+  
+```bash
 ! add SQL files 
     Output:SQLite,
         SimpleAndTabular;                       !- Option Type
 
 ! add output for drawings 
   Output:Surfaces:Drawing,dxf;
+```
 
+Check against the schema for a 22.2 version 
+```bash
+code $EPLUS_BEM/Energy+.schema.epJSON 
 
 ```
+
+Energyplus function CLI usage
+
+    ```bash 
+
+    Usage: energyplus [options] [input-file]
+    Options:
+    -a, --annual                 Force annual simulation
+    -c, --convert                Output IDF->epJSON or epJSON->IDF, dependent on
+                                input file type
+    -d, --output-directory ARG   Output directory path (default: current
+                                directory)
+    -D, --design-day             Force design-day-only simulation
+    -h, --help                   Display help information
+    -i, --idd ARG                Input data dictionary path (default: Energy+.idd
+                                in executable directory)
+    -j, --jobs ARG               Multi-thread with N threads; 1 thread with no
+                                arg. (Currently only for G-Function generation)
+    -m, --epmacro                Run EPMacro prior to simulation
+    -p, --output-prefix ARG      Prefix for output file names (default: eplus)
+    -r, --readvars               Run ReadVarsESO after simulation
+    -s, --output-suffix ARG      Suffix style for output file names (default: L)
+                                    L: Legacy (e.g., eplustbl.csv)
+                                    C: Capital (e.g., eplusTable.csv)
+                                    D: Dash (e.g., eplus-table.csv)
+    -v, --version                Display version information
+    -w, --weather ARG            Weather file path (default: in.epw in current
+                                directory)
+    -x, --expandobjects          Run ExpandObjects prior to simulation
+    --convert-only                 Only convert IDF->epJSON or epJSON->IDF,
+                                dependent on input file type. No simulation
+    Example: energyplus -w weather.epw -r input.idf
+    ```
 
 
 

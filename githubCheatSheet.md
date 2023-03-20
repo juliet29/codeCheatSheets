@@ -1,6 +1,17 @@
 # Github Cheat Sheet 
 
-* If initialize online, just do automatic and don't change anything! 
+* If initialize online, just do automatic and don't change anything!
+  ```bash
+    echo "# buildingEnergyModels" >> README.md
+    git init
+    git add README.md
+    git commit -m "first commit"
+    git branch -M main
+    git remote add origin https://github.com/juliet29/buildingEnergyModels.git
+    git push -u origin main
+
+
+  ``` 
 
 * Initialize a repo on the command line 
     ```bash 
@@ -12,6 +23,7 @@
     git remote add origin https://github.com/juliet29/bthermal_model
     git push -u origin master
     ```
+
 
 
 

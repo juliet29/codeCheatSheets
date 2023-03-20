@@ -95,6 +95,8 @@ save: ctrl + s
 
 
 ## Fish 
+[Fish on the command line](https://github.com/jorgebucaran/cookbook.fish#wheres-the-bash_profile-or-bashrc-equivalent-in-fish)
+[Commands in fish](https://fishshell.com/docs/current/commands.html)
 
 Set the value of the variable _$foo_ to be ‘hi’.:
 ```bash
@@ -102,6 +104,7 @@ set foo hi
 ```
 
 Functions on the command line 
+- add to: ~/.config/fish/config.fish
 ```bash
 # lazytouch, make a file and then open it
 # --> usage lto folder/filename.suffix
@@ -110,4 +113,17 @@ function lto
     code $argv
 end
 
+# check if a function exists 
+functions 
+```
+
+
+Autocompletions 
+* Accept one word of autocompletion: (option) + right arrow
+
+Exporting variables 
+```bash 
+# in home directory 
+set -Ux MyVariable SomeValue
+set -Ux EPLUS_BEM ../../../../Applications/EnergyPlus-22-2-0/
 ```
