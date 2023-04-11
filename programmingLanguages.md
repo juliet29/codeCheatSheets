@@ -118,6 +118,8 @@ ic.configureOutput(includeContext=True)
 ```
 
 #### Pandas
+TODO: [ignore pandas warning](https://stackoverflow.com/questions/15933741/how-do-i-catch-a-numpy-warning-like-its-an-exception-not-just-for-testing) 
+
 Importing and Exporting Data
 ```python
 
@@ -147,6 +149,17 @@ df.to_csv("outputs/name.csv", index=False)
 
 Selection 
 ```python
+# general indexing 
+# select many columns by index
+sing_df.iloc[:, 2:8]
+
+## select many columns by name?
+
+
+# TODO: multiindexing! 
+
+
+
 # select in between two dates => 
 ## without making time indices:
 noon_start = str2dt('2022, 07, 20, 12, 00') # strdt in in _UILCode/windows/analysis/scripts
@@ -238,7 +251,7 @@ sns.set_theme(style="ticks")
 # simple probability distributions 
 sns.displot(deriv_df, x="deriv")
 
-# visualize all the data correlations -> pairplots
+# pairplot with hue (visualize scatter plots )
 sns.pairplot(df, height=1, aspect =2, hue="<df col>")
 plt.show()
 
@@ -282,6 +295,9 @@ fig.add_trace(go.Scatter(
     y=b, 
     mode='markers',
 ))
+fig.update_layout(xaxis_title='Dates',
+                  yaxis_title='Temperature (ºC)',
+                  title='All Data')
 
 # quick line plot
 fig = go.Figure()
@@ -294,6 +310,8 @@ fig.add_trace(go.Scatter(
     marker_color='< >',
     showlegend=False,
     text=df0["Other Data"] # hover text label 
+    # edit line 
+    line=dict(color='royalblue', width=4, dash='dot')
 ))
 
 
@@ -308,16 +326,9 @@ fig.add_trace(go.Scatter(
         size=16
     )
 ))
-
-
-fig.update_layout(xaxis_title='Dates',
-                  yaxis_title='Temperature (ºC)',
-                  title='All Data')
                   
-
-
 # subplots
-fig = make_subplots(rows=5, cols=1, shared_xaxes=True, subplot_titles=("Plot 1", "Plot 2", "Plot 3", "Plot 4")
+fig = make_subplots(rows=5, cols=1, shared_xaxes=True, subplot_titles=("Plot 1", "Plot 2", "Plot 3", "Plot 4"))
 
 for ix, room in enumerate(rooms.values()):
   # only show legend the first time, and make similar items have the same color 
@@ -369,20 +380,35 @@ for ix, df in enumerate(exp_dct.values()):
 
 fig.show()
 
+# format datetime axes 
+fig.update_xaxes(
+    dtick="D1",
+    tickformat='%d %b')
 
+# horizontal legend 
+fig.update_layout(legend=dict(
+    orientation="h",
+    xanchor="left",
+    x=0.1
+))
 ```
+[editing time axis](https://plotly.com/python/reference/layout/xaxis/)
+[time formatting](https://github.com/d3/d3-time-format)
+
 
 [Making and setting plotly themes](https://stackoverflow.com/questions/63011674/plotly-how-to-change-the-default-color-pallete-in-plotly)
 * [Plotly reference on themes](https://plotly.com/python/templates/#saving-and-distributing-custom-themes)
 ```python 
-import plotly.io as pio
 import plotly.graph_objects as go
-pio.templates["myname"] = go.layout.Template(
+import plotly.io as pio
+
+colorway = ['#702632', '#A4B494', '#495867', '#912F40', "#81909E", "#F4442E", "#DB7C26", "#BB9BB0"]
+pio.templates["cardinal"] = go.layout.Template(
     layout=go.Layout(
-        colorway=['#ff0000', '#00ff00', '#0000ff']
-    )
+        colorway=colorway
+    ))
 # combine templates 
-pio.templates.default = 'plotly_white+myname'
+pio.templates.default = 'plotly_white+cardinal'
 
 ```
 
